@@ -47,7 +47,7 @@ def part1():
 
 def part2():
     rules = parse_rules()
-    return count_bags('shiny gold', rules) - 1
+    return count_bags('shiny gold', rules) - 1 # count bags will include the root shiny gold bag, so remove it here
 
 print(part1())
 print(part2())
