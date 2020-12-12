@@ -27,6 +27,7 @@ def count_branches(adaptors, initial_adaptor):
 
 def part2():
     adaptors = parse_input()
+    adaptors.append(0)
     adaptors.sort()
 
     adaptor_combos = []
