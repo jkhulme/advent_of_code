@@ -37,34 +37,15 @@ def neighbours(x, y, z, cube):
     max_y = len(cube[0])
     max_x = len(cube[0][0])
 
-    adjacent = [
-        (x - 1, y - 1, z - 1),
-        (x, y - 1, z - 1),
-        (x + 1 , y - 1, z - 1),
-        (x - 1, y, z - 1),
-        (x, y, z - 1),
-        (x + 1, y, z - 1),
-        (x - 1, y + 1, z - 1),
-        (x, y + 1, z - 1),
-        (x + 1, y + 1, z - 1),
-        (x - 1, y - 1, z),
-        (x, y - 1, z),
-        (x + 1 , y - 1, z),
-        (x - 1, y, z),
-        (x + 1, y, z),
-        (x - 1, y + 1, z),
-        (x, y + 1, z),
-        (x + 1, y + 1, z),
-        (x - 1, y - 1, z + 1),
-        (x, y - 1, z + 1),
-        (x + 1 , y - 1, z + 1),
-        (x - 1, y, z + 1),
-        (x, y, z + 1),
-        (x + 1, y, z + 1),
-        (x - 1, y + 1, z + 1),
-        (x, y + 1, z + 1),
-        (x + 1, y + 1, z + 1),
-    ]
+    adjacent = []
+
+    for new_z in range(z - 1, z + 2):
+        for new_y in range(y - 1, y + 2):
+            for new_x in range(x - 1, x + 2):
+                if new_x == x and new_y == y and new_z == z:
+                    continue
+                else:
+                    adjacent.append((new_x, new_y, new_z))
 
     return [(x, y, z) for x, y, z in adjacent if x >= 0 and y >= 0 and z >= 0 and x < max_x and y < max_y and z < max_z]
 
