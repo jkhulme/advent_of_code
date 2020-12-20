@@ -1,10 +1,4 @@
 def parse_input():
-    # return [
-    #     '2 * 3 + (4 * 5)',
-    #     '5 + (8 * 3 + 9 + 3 * 4 * 3)',
-    #     '5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))',
-    #     '((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2'
-    # ]
     with open('day18_input.txt', 'r') as reader:
         return [line.strip() for line in reader.readlines()]
 
@@ -35,14 +29,38 @@ def evaluate(expression):
             closing = expression[end].count(')')
             expression[start] = expression[start].replace('(', '')
             expression[end] = expression[end].replace(')', '')
-            expression[start:end + 1] = ['(' * (opening - 1) + str(sub_evaluate(expression[start:end + 1])) + ')' * (closing - 1)]
+            expression[start:end + 1] = ['(' * (opening - 1) + str(evaluate(expression[start:end + 1])) + ')' * (closing - 1)]
             return evaluate(expression)
 
     return sub_evaluate(expression)
 
+def evaluate2(expression):
+    for i, e in enumerate(expression):
+        if e.startswith('('):
+            start = i
+        if e.endswith(')'):
+            end = i
+            opening = expression[start].count('(')
+            closing = expression[end].count(')')
+            expression[start] = expression[start].replace('(', '')
+            expression[end] = expression[end].replace(')', '')
+            expression[start:end + 1] = ['(' * (opening - 1) + str(evaluate2(expression[start:end + 1])) + ')' * (closing - 1)]
+            return evaluate2(expression)
+
+    for i, e in enumerate(expression):
+        if e == '+':
+            expression[i - 1:i + 2] = [str(sub_evaluate(expression[i - 1:i + 2]))]
+            return evaluate2(expression)
+
+    return sub_evaluate(expression)
 
 def part1():
     expressions = parse_input()
     return sum([evaluate(expression.split(' ')) for expression in expressions])
 
+def part2():
+    expressions = parse_input()
+    return sum([evaluate2(expression.split(' ')) for expression in expressions])
+
 print(part1())
+print(part2())
