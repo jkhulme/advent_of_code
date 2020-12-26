@@ -11,40 +11,44 @@ class Node:
 class LinkedList:
     def __init__(self):
         self.start_node = None
+        self.last_node = None
         self.lookup = {}
+        self.max_label = 0
 
     def insert(self, node):
         self.lookup[node.data] = node
+        if node.data > self.max_label:
+            self.max_label = node.data
+
         if self.start_node is None:
             self.start_node = node
+            self.last_node = node
         else:
-            n = self.start_node
-            while n.next is not None:
-                n = n.next
-            n.next = node
-            node.prev = n
+            self.last_node.next = node
+            node.prev = self.last_node
+            self.last_node = node
 
     def loop(self):
-        n = self.start_node
-        while n.next is not None:
-            n = n.next
-        self.start_node.prev = n
-        n.next = self.start_node
+        self.start_node.prev = self.last_node
+        self.last_node.next = self.start_node
 
-    def destination(self, pickup):
+    def destination(self):
         n = self.start_node
-        ignore = [n.data for n in pickup]
+        ignore = [n.next.data, n.next.next.data, n.next.next.next.data]
 
         d = n.data - 1
-        ks = self.lookup.keys()
 
-        while d >= min(ks):
+        while d > 0:
             if d not in ignore:
                 return self.lookup[d]
 
             d = d - 1
 
-        return self.lookup[max(ks - ignore)]
+        max_key = self.max_label
+        while True:
+            if max_key not in ignore:
+                return self.lookup[max_key]
+            max_key = max_key - 1
 
     def __str__(self):
         output = []
@@ -55,21 +59,18 @@ class LinkedList:
 
         return ''.join(output)
 
-    def move(self, pick_up, destination):
-        pre_cut = pick_up[0].prev
-        post_cut = pick_up[2].next
+    def move(self, destination):
+        cut_start = self.start_node.next
+        cut_end = cut_start.next.next
 
-        pre_cut.next = post_cut
-        post_cut.prev = pre_cut
+        cut_start.prev.next = cut_end.next
+        cut_end.next.prev = cut_start.prev
 
-        pre_insert = destination
-        post_insert = destination.next
+        cut_end.next = destination.next
+        destination.next.prev = cut_end
 
-        pre_insert.next = pick_up[0]
-        pick_up[0].prev = pre_insert
-
-        pick_up[2].next = post_insert
-        post_insert.prev = pick_up[2]
+        destination.next = cut_start
+        cut_start.prev = destination
 
     def find(self, label):
         return self.lookup[label]
@@ -79,44 +80,30 @@ def play(ll):
     pick_up = []
     current_cup = ll.start_node
     cup = current_cup
-    for i in range(0, 3):
-        cup = cup.next
-        pick_up.append(cup)
-    d = ll.destination(pick_up)
-    ll.move(pick_up, d)
+    d = ll.destination()
+    ll.move(d)
 
     ll.start_node = ll.start_node.next
 
     return ll
 
-def post1(cups):
-    idx1 = cups.index(1)
-    l = len(cups)
-    result = []
-    for i in range(1, l):
-        idx = (i + idx1) % l
-        result.append(str(cups[idx]))
-
-    return result
-
 def link(cups):
     ll = LinkedList()
     for c in cups:
         ll.insert(Node(c))
-    ll.loop()
 
     return ll
 
-def part2_cups():
-    cups = [int(i) for i in '326519478']
-    max_cup = max(cups)
-    for i in range(max_cup + 1, 1000001):
-        cups.append(i)
+def pad(ll, min_c, max_c):
+    for i in range(min_c + 1, max_c + 1):
+        ll.insert(Node(i))
 
-    return cups
+    return ll
 
 def part1():
-    ll = link('389125467')
+    ll = link('326519478')
+    ll.loop()
+
     for i in range(0, 100):
         ll = play(ll)
 
@@ -125,12 +112,20 @@ def part1():
     return str(ll)[1:]
 
 def part2():
-    cups = part2_cups()
-    current_cup_idx = 0
-    for i in range(0, 1):
-        cups, current_cup_idx = play(cups, current_cup_idx)
+    cups = '326519478'
+    ll = link(cups)
+    ll = pad(ll, len(cups), 1000000)
+    ll.loop()
 
-    return cups[1], cups[2]
+    print("playing")
+    for i in range(0, 10000000):
+        ll = play(ll)
+
+    n1 = ll.find(1)
+    n1_n = n1.next
+    n1_nn = n1_n.next
+
+    return n1_n.data * n1_nn.data
 
 print(part1())
-# print(part2())
+print(part2())
