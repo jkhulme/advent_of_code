@@ -20,7 +20,12 @@ def parse_input():
                     parsed_rules[k] = rules
                     continue
                 else:
-                    parsed_rules[k] = [rule.strip().split(' ') for rule in rules.split('|')]
+                    if k == '8':
+                        parsed_rules[k] = [['42'] * i for i in range(1, 10)]
+                    elif k == '11':
+                        parsed_rules[k] = [['42'] * i + ['31'] * i for i in range(1, 10)]
+                    else:
+                        parsed_rules[k] = [rule.strip().split(' ') for rule in rules.split('|')]
             else:
                 strings.append(line)
 
