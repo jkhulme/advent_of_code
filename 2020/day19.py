@@ -1,3 +1,6 @@
+import re
+
+
 def parse_input():
     parsed_rules = {}
     strings = []
@@ -37,6 +40,7 @@ def build_regex(rules, key):
 
 def part1():
     rules, strings = parse_input()
-    return build_regex(rules, "0")
+    pattern = "^" + build_regex(rules, "0") + "$"
+    return sum([1 for s in strings if re.match(pattern, s)])
 
 print(part1())
