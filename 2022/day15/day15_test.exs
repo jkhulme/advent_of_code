@@ -8,7 +8,7 @@ defmodule Day15Test do
 
   describe "part1()" do
     test "Finds the correct amount of places that cant have a sensor" do
-      assert Day15.part1("day15_test_input.txt") == 26
+      assert Day15.part1("day15_test_input.txt", 10) == 26
     end
   end
 

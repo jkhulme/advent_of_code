@@ -1,17 +1,18 @@
 defmodule Day15 do
-  def part1(input_path) do
+  def part1(input_path, goal) do
     locations = parseInput(input_path)
     {sensors, beacons} = separate(locations, [], [])
     minX = Enum.map([sensors, beacons], fn cs -> Enum.min_by(cs, fn {x, _} -> x end) end) |> Enum.min |> elem(0)
     maxX = Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {x, _} -> x end) end) |> Enum.max |> elem(0)
     minY = Enum.map([sensors, beacons], fn cs -> Enum.min_by(cs, fn {_, y} -> y end) end) |> Enum.min |> elem(1)
-    maxY = Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {_, y} -> y end) end) |> Enum.max |> elem(1)
+    # maxY = Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {_, y} -> y end) end) |> Enum.max |> elem(1)
 
-    grid = Enum.to_list(minY..maxY) |> Enum.map(fn y -> Enum.map(Enum.to_list(minX..maxX), fn x -> {x, y} end) end)
+    gY = goal + minY
+    row = Enum.map(Enum.to_list(minX..maxX), fn x -> {x, gY} end)
 
     closest = Enum.map(locations, fn [s, b] -> { s, distance(s, b) } end)
 
-    grid |> Enum.at(10 + minY) |> checkRow(sensors, beacons, closest)
+    checkRow(row, sensors, beacons, closest)
   end
 
   def part2(input_path) do
@@ -62,5 +63,5 @@ defmodule Day15 do
   end
 end
 
-# IO.puts(Day15.part1("day15_input.txt"))
+IO.puts(Day15.part1("day15_input.txt", 2000000))
 # IO.puts(Day15.part2("day15_input.txt"))
