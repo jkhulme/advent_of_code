@@ -11,45 +11,35 @@ defmodule Day15 do
 
     closest = Enum.map(locations, fn [s, b] -> { s, distance(s, b) } end)
 
-    state = checkGrid(%{}, sensors, beacons, closest, grid)
-
-    print(grid, state)
-
-    Enum.map(Enum.at(grid, 10 + minY), fn cell -> state[cell] end) |> Enum.filter(fn x -> x == "#" end) |> Enum.count
+    grid |> Enum.at(10 + minY) |> checkRow(sensors, beacons, closest)
   end
 
   def part2(input_path) do
     parseInput(input_path)
   end
 
-  defp print([], _) do
-    IO.puts("\n")
-  end
-  defp print([row | rows], state) do
-    row |> Enum.map(fn x -> Map.get(state, x, ".") end) |> Enum.join("") |> IO.puts
-    print(rows, state)
+  # defp print([], _) do
+  #   IO.puts("\n")
+  # end
+  # defp print([row | rows], state) do
+  #   row |> Enum.map(fn x -> Map.get(state, x, ".") end) |> Enum.join("") |> IO.puts
+  #   print(rows, state)
+  # end
+
+  defp checkRow(row, sensors, beacons, closest) do
+    row |> Enum.count(&beaconFree?(&1, sensors, beacons, closest))
   end
 
-  defp checkGrid(state, _, _, _, []) do
-    state
-  end
-  defp checkGrid(state, sensors, beacons, closest, [row | rows]) do
-    checkRow(state, sensors, beacons, closest, row) |> checkGrid(sensors, beacons, closest, rows)
-  end
-
-  defp checkRow(state, _, _, _, []) do
-    state
-  end
-  defp checkRow(state, sensors, beacons, closest, [cell | cells]) do
+  defp beaconFree?(cell, sensors, beacons, closest) do
     cond do
       Enum.member?(beacons, cell) ->
-        Map.put(state, cell, "B") |> checkRow(sensors, beacons, closest, cells)
+        false
       Enum.member?(sensors, cell) ->
-        Map.put(state, cell, "S") |> checkRow(sensors, beacons, closest, cells)
+        false
       Enum.map(closest, fn {p, d} -> distance(cell, p) <= d end) |> Enum.any? ->
-        Map.put(state, cell, "#") |> checkRow(sensors, beacons, closest, cells)
+        true
       true ->
-        checkRow(state, sensors, beacons, closest, cells)
+        false
     end
   end
 
