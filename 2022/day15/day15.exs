@@ -1,13 +1,9 @@
 defmodule Day15 do
-  def part1(input_path, goal) do
+  def part1(input_path, gY) do
     locations = parseInput(input_path)
     {sensors, beacons} = separate(locations, [], [])
     minX = Enum.map([sensors, beacons], fn cs -> Enum.min_by(cs, fn {x, _} -> x end) end) |> Enum.min |> elem(0)
     maxX = Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {x, _} -> x end) end) |> Enum.max |> elem(0)
-    minY = Enum.map([sensors, beacons], fn cs -> Enum.min_by(cs, fn {_, y} -> y end) end) |> Enum.min |> elem(1)
-    # maxY = Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {_, y} -> y end) end) |> Enum.max |> elem(1)
-
-    gY = goal + minY
     row = Enum.map(Enum.to_list(minX..maxX), fn x -> {x, gY} end)
 
     closest = Enum.map(locations, fn [s, b] -> { s, distance(s, b) } end)
