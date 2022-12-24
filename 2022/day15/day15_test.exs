@@ -12,9 +12,9 @@ defmodule Day15Test do
     end
   end
 
-  # describe "part2()" do
-  #   test "Finds the amount of sand needed to reach the start point" do
-  #     assert Day15.part2("day15_test_input.txt") == 93
-  #   end
-  # end
+  describe "part2()" do
+    test "Finds the frequency of the distress beacon" do
+      assert Day15.part2("day15_test_input.txt", 20) == 56000011
+    end
+  end
 end

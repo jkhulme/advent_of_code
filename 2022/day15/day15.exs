@@ -2,38 +2,68 @@ defmodule Day15 do
   def part1(input_path, gY) do
     locations = parseInput(input_path)
     {sensors, beacons} = separate(locations, [], [])
-    minX = Enum.map([sensors, beacons], fn cs -> Enum.min_by(cs, fn {x, _} -> x end) end) |> Enum.min |> elem(0)
-    maxX = Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {x, _} -> x end) end) |> Enum.max |> elem(0)
-    row = Enum.map(Enum.to_list(minX..maxX), fn x -> {x, gY} end)
-
     closest = Enum.map(locations, fn [s, b] -> { s, distance(s, b) } end)
+    maxRange = Enum.max_by(closest, fn {_, d} -> d end) |> elem(1)
+
+    minX = (Enum.map([sensors, beacons], fn cs -> Enum.min_by(cs, fn {x, _} -> x end) end) |> Enum.min |> elem(0)) - maxRange
+    maxX = (Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {x, _} -> x end) end) |> Enum.max |> elem(0)) + maxRange
+    row = Enum.map(Enum.to_list(minX..maxX), fn x -> {x, gY} end)
 
     checkRow(row, sensors, beacons, closest)
   end
 
-  def part2(input_path) do
-    parseInput(input_path)
+  def part2(input_path, maxXY) do
+    locations = parseInput(input_path)
+    {sensors, beacons} = separate(locations, [], [])
+    closest = Enum.map(locations, fn [s, b] -> { s, distance(s, b) } end)
+    maxRange = Enum.max_by(closest, fn {_, d} -> d end) |> elem(1)
+
+    maxX = [(Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {x, _} -> x end) end) |> Enum.max |> elem(0)) + maxRange, maxXY] |> Enum.min
+    maxY = [(Enum.map([sensors, beacons], fn cs -> Enum.max_by(cs, fn {y, _} -> y end) end) |> Enum.max |> elem(1)) + maxRange, maxXY] |> Enum.min
+
+    dY = locateDistressBeacon(maxY, maxX, sensors, beacons, closest)
+    dX = Enum.map(Enum.to_list(0..maxX), fn x -> beacon?({x, dY}, sensors, beacons, closest) end) |> Enum.find_index(fn c -> c == true end)
+
+    (4000000 * dX) + dY
   end
 
-  # defp print([], _) do
-  #   IO.puts("\n")
-  # end
-  # defp print([row | rows], state) do
-  #   row |> Enum.map(fn x -> Map.get(state, x, ".") end) |> Enum.join("") |> IO.puts
-  #   print(rows, state)
-  # end
+  defp locateDistressBeacon(-1, _, _, _, _) do
+    -1
+  end
+  defp locateDistressBeacon(y, maxX, sensors, beacons, closest) do
+    beaconCandidates = Enum.map(Enum.to_list(0..maxX), fn x -> {x, y} end) |> Enum.count(&beacon?(&1, sensors, beacons, closest))
+    cond do
+      beaconCandidates == 1 ->
+        y
+      true ->
+        locateDistressBeacon(y - 1, maxX, sensors, beacons, closest)
+    end
+  end
 
   defp checkRow(row, sensors, beacons, closest) do
     row |> Enum.count(&beaconFree?(&1, sensors, beacons, closest))
   end
 
-  defp beaconFree?(cell, sensors, beacons, closest) do
+  defp beacon?(cell, sensors, beacons, closest) do
     cond do
       Enum.member?(beacons, cell) ->
         false
       Enum.member?(sensors, cell) ->
         false
-      Enum.map(closest, fn {p, d} -> distance(cell, p) <= d end) |> Enum.any? ->
+      Enum.map(closest, fn {s, d} -> distance(s, cell) <= d end) |> Enum.any? ->
+        false
+      true ->
+        true
+    end
+  end
+
+  defp beaconFree?(cell, _, beacons, closest) do
+    cond do
+      Enum.member?(beacons, cell) ->
+        false
+      # Enum.member?(sensors, cell) ->
+      #   false
+      Enum.map(closest, fn {s, d} -> distance(s, cell) <= d end) |> Enum.any? ->
         true
       true ->
         false
@@ -59,5 +89,5 @@ defmodule Day15 do
   end
 end
 
-IO.puts(Day15.part1("day15_input.txt", 2000000))
-# IO.puts(Day15.part2("day15_input.txt"))
+# IO.puts(Day15.part1("day15_input.txt", 2000000))
+IO.puts(Day15.part2("day15_input.txt", 4000000))
