@@ -1,27 +1,43 @@
 defmodule Day11 do
   def part1(input_path) do
     parseInput(input_path)
-      |> Enum.map(&blink(&1, 25))
+      |> blink_stones(6, %{}, [])
       |> Enum.sum
+      # |> Enum.map(&Enum.at(&1, 0))
+      # |> Enum.sum
   end
 
   def part2(input_path) do
     parseInput(input_path)
-      |> Enum.map(&blink(&1, 75))
+      |> blink_stones(75, %{}, [])
       |> Enum.sum
   end
 
-  def blink(_, 0) do
-    1
+  def blink_stones([], _, _, acc) do
+    acc
   end
-  def blink(n, i) do
+  def blink_stones([s | ss], n, stones, acc) do
+    [count, updated_stones] = blink(s, n, stones)
+    IO.inspect(updated_stones)
+    blink_stones(ss, n, updated_stones, [count | acc])
+  end
+
+  def blink(s, 0, stones) do
+    [1, Map.put(stones, {s, 0}, 1)]
+  end
+  def blink(s, t, stones) do
     cond do
-      n == "0" -> blink("1", i - 1)
-      Integer.mod(String.length(n), 2) == 0 ->
-        {l, r} = String.split_at(n, Integer.floor_div(String.length(n), 2))
-        blink(trim_zeros(r), i - 1) + blink(trim_zeros(l), i - 1)
+      Map.get(stones, {s, t}) ->
+        [Map.get(stones, {s, t}), stones]
+      s == "0" ->
+        blink("1", t - 1, Map.put(stones, {s, t}, 1))
+      Integer.mod(String.length(s), 2) == 0 ->
+          {l, r} = String.split_at(s, Integer.floor_div(String.length(s), 2))
+          [n1, map1] = blink(trim_zeros(r), t - 1, Map.put(stones, {s, t}, 2))
+          [n2, map2] = blink(trim_zeros(l), t - 1, map1)
+          [n1 + n2, map2]
       true ->
-        blink(Integer.to_string(String.to_integer(n) * 2024), i - 1)
+          blink(Integer.to_string(String.to_integer(s) * 2024), t - 1, Map.put(stones, {s, t}, 1))
     end
   end
 
